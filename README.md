@@ -1,28 +1,28 @@
-#  AI Cover Letter Generator
+# SmartLetter AI – Cover Letter Generator
 
-Generate professional, tailored cover letters instantly — just upload your CV and paste a job description.  
-This tool uses **Google Gemini AI** to analyze your resume and the job offer, then writes a compelling, personalized letter in seconds.
+SmartLetter AI is an intelligent, multi-language cover letter generator built with Streamlit and the Gemini API. Upload your CV, paste the job description, and generate a tailored cover letter in English, French, or Arabic in seconds.
 
-##  Features
+## Features
 
-- ✅ Upload your CV (PDF)
-- ✅ Paste the job description
-- ✅ Choose your tone (professional, confident, etc.)
-- ✅ Instantly generate a high-quality cover letter
-- ✅ Built with Python + Streamlit + Gemini
+- Upload CV in PDF format
+- Supports English, French, and Arabic
+- Personalized cover letters based on job description
+- Clean, professional interface
+- Instant PDF download
 
-##  How to Use
+## How It Works
 
-> You don’t need to install anything or know how to code.
+1. Go to the application page.
+2. Upload your CV (PDF format).
+3. Paste the job description.
+4. Choose your preferred language.
+5. Click “Generate” to get a personalized cover letter.
+6. Download the letter as a PDF.
 
-1. Click this link to open the app:  
-   👉 **[Your Streamlit App Link Here]**
+## About the Project
 
-2. Upload your CV (PDF format)  
-3. Paste the job description  
-4. Choose your tone  
-5. Click **“Generate Cover Letter”**  
-6. Copy or download your personalized letter!
+SmartLetter AI helps job seekers save time and stand out by creating tailored cover letters that match each job offer. It uses advanced AI models to understand both the CV and the job requirements, then generates a well-written letter in the selected language.
 
----
+## License
 
+MIT License © Taoufik Errajraji
