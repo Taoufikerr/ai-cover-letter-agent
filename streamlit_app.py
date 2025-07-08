@@ -6,9 +6,39 @@ import requests
 # Gemini
 import google.generativeai as genai
 
-# Setup Gemini API Key
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-model = genai.GenerativeModel("models/gemini-1.5-pro")
+
+model = genai.GenerativeModel(
+    model_name='models/gemini-1.5-pro-latest',
+    safety_settings=[
+        {"category": "HARM_CATEGORY_DANGEROUS", "threshold": "BLOCK_NONE"},
+        {"category": "HARM_CATEGORY_SEXUAL", "threshold": "BLOCK_NONE"},
+        {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+        {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+    ]
+)
+
+prompt = "Write a cover letter for a React/Node.js job based on my resume."
+
+if not prompt.strip():
+    st.error("⚠️ Prompt is empty.")
+else:
+    try:
+        response = model.generate_content(prompt)
+        st.write(response.text)
+    except Exception as e:
+        st.error(f"❌ Gemini error: {e}")
+
+# ✅ Before calling generate_content
+if not prompt.strip():
+    st.error("⚠️ Prompt is empty. Please enter valid input.")
+else:
+    try:
+        response = model.generate_content(prompt)
+        st.success("✅ Cover Letter Generated")
+        st.write(response.text)
+    except Exception as e:
+        st.error(f"❌ Error generating content: {e}")
 
 # Page config
 st.set_page_config(page_title="AI Cover Letter Generator", page_icon="📝")
