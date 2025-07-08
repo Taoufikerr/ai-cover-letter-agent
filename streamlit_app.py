@@ -17,7 +17,7 @@ except KeyError:
     st.stop()
 
 # Load Gemini model
-model = genai.GenerativeModel("gemini-1.5-pro")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 # -------------------- FILE UPLOAD --------------------
 uploaded_file = st.file_uploader("📎 Upload your CV (PDF)", type="pdf")
