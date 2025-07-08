@@ -1,81 +1,73 @@
 import streamlit as st
 import fitz  # PyMuPDF
-import os
-import requests
-
-# Gemini
 import google.generativeai as genai
+import os
 
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+# -------------------- SETUP --------------------
+st.set_page_config(page_title="AI Cover Letter Generator", layout="wide")
 
-model = genai.GenerativeModel(
-    model_name='models/gemini-1.5-pro-latest',
-    safety_settings=[
-        {"category": "HARM_CATEGORY_DANGEROUS", "threshold": "BLOCK_NONE"},
-        {"category": "HARM_CATEGORY_SEXUAL", "threshold": "BLOCK_NONE"},
-        {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-        {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-    ]
-)
+st.title("📄 AI Cover Letter Generator with Gemini")
+st.write("Upload your CV and paste a job description. Let Gemini write your tailored cover letter.")
 
-prompt = "Write a cover letter for a React/Node.js job based on my resume."
+# -------------------- GEMINI CONFIG --------------------
+try:
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+except KeyError:
+    st.error("❌ Missing Gemini API key. Please set 'GEMINI_API_KEY' in Streamlit secrets.")
+    st.stop()
 
-if not prompt.strip():
-    st.error("⚠️ Prompt is empty.")
-else:
-    try:
-        response = model.generate_content(prompt)
-        st.write(response.text)
-    except Exception as e:
-        st.error(f"❌ Gemini error: {e}")
+# Load Gemini model
+model = genai.GenerativeModel("models/gemini-1.5-pro")
 
-# ✅ Before calling generate_content
-if not prompt.strip():
-    st.error("⚠️ Prompt is empty. Please enter valid input.")
-else:
-    try:
-        response = model.generate_content(prompt)
-        st.success("✅ Cover Letter Generated")
-        st.write(response.text)
-    except Exception as e:
-        st.error(f"❌ Error generating content: {e}")
+# -------------------- FILE UPLOAD --------------------
+uploaded_file = st.file_uploader("📎 Upload your CV (PDF)", type="pdf")
 
-# Page config
-st.set_page_config(page_title="AI Cover Letter Generator", page_icon="📝")
-
-st.title("📝 AI Cover Letter Generator")
-
-# Upload CV
-uploaded_file = st.file_uploader("Upload your CV (PDF)", type=["pdf"])
-job_description = st.text_area("Paste the Job Description", height=200)
-
-if uploaded_file and job_description:
-    # Extract text from PDF
-    with fitz.open(stream=uploaded_file.read(), filetype="pdf") as doc:
-        cv_text = ""
+def extract_text_from_pdf(pdf_file):
+    text = ""
+    with fitz.open(stream=pdf_file.read(), filetype="pdf") as doc:
         for page in doc:
-            cv_text += page.get_text()
+            text += page.get_text()
+    return text.strip()
 
-    st.success("✅ CV content extracted!")
+cv_text = ""
+if uploaded_file:
+    cv_text = extract_text_from_pdf(uploaded_file)
+    st.success("✅ CV text extracted successfully.")
 
-    # Prompt Gemini
+# -------------------- JOB DESCRIPTION --------------------
+job_description = st.text_area("💼 Paste the Job Description here", height=200)
+
+# -------------------- GENERATE BUTTON --------------------
+if st.button("🚀 Generate Cover Letter"):
+    if not cv_text or not job_description:
+        st.warning("⚠️ Please upload a CV and paste a job description.")
+        st.stop()
+
     prompt = f"""
-    You are an expert career assistant. Generate a professional cover letter based on the candidate's CV and the job description.
+You are an expert career assistant. Based on the resume text and the job description below, write a personalized, professional, and concise cover letter tailored to the job.
 
-    CV:
-    {cv_text}
+Resume:
+\"\"\"
+{cv_text[:15000]}  # trimmed to avoid token limits
+\"\"\"
 
-    Job Description:
-    {job_description}
+Job Description:
+\"\"\"
+{job_description}
+\"\"\"
 
-    Write a concise, enthusiastic cover letter tailored to this job.
-    """
+Cover Letter:
+"""
 
-    with st.spinner("Generating cover letter..."):
+    try:
         response = model.generate_content(prompt)
-        letter = response.text
+        generated_letter = response.text
+        st.subheader("📬 Generated Cover Letter")
+        st.write(generated_letter)
 
-    st.subheader("📄 Generated Cover Letter:")
-    st.write(letter)
+        # Optional download button
+        st.download_button("📩 Download as .txt", generated_letter, file_name="cover_letter.txt")
 
-    st.download_button("📥 Download as .txt", data=letter, file_name="cover_letter.txt", mime="text/plain")
+    except Exception as e:
+        st.error(f"❌ Gemini API Error: {e}")
+
